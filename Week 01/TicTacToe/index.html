@@ -1,0 +1,219 @@
+<style>
+  .cell {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-color: aqua;
+    border: solid 1px white;
+    vertical-align: middle;
+    line-height: 100px;
+    font-size: 50px;
+    text-align: center;
+  }
+</style>
+
+<div id='board'></div>
+
+<script>
+  let chessboard = [
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0
+  ]
+
+  let status = 1 // 全局变量，标记当前哪一方下子
+  let isWin = false // 全局变量，标记是否已获胜结束
+  let stack = []
+  const userStatus = 1 // 人执子的颜色
+  const computerStatus = 2 // ai执子的颜色
+
+  /*
+  * @param {number} i 行坐标
+  * @param {number} j 列坐标
+  */
+  function getCellStatus(chessboard, i, j) {
+    return chessboard[i * 3 + j]
+  }
+
+  /*
+  * @param {number} i 行坐标
+  * @param {number} j 列坐标
+  */
+  function setCellStatus(chessboard, i, j, status) {
+    return chessboard[i * 3 + j] = status
+  }
+
+  function pushStep(i, j, status) {
+    stack.push({
+      i: i,
+      j: j,
+      status: status
+    })
+  }
+  function rollback(n) {
+    for (let i = 0; i < n; i++) {
+      let step = stack.pop()
+      setCellStatus(chessboard, step.i, step.j, 0)
+    }
+  }
+
+  function check(chessboard, status) {
+    for (let i = 0; i < 3; i ++) { // 横向3连子
+      let win = true
+      for (let j = 0; j < 3; j++) {
+        if (getCellStatus(chessboard, i, j) !== status) {
+          win = false
+        }
+      }
+      if (win) {
+        return true
+      }
+    }
+
+    for (let i = 0; i < 3; i ++) { // 竖向3连子
+      let win = true
+      for (let j = 0; j < 3; j++) {
+        if (getCellStatus(chessboard, j, i) !== status) {
+          win = false
+        }
+      }
+      if (win) {
+        return true
+      }
+    }
+
+    { // 左上角到右下角交叉线3连子
+      let win = true
+      for (let j = 0; j < 3; j++) {
+        if (getCellStatus(chessboard, j, j) !== status) {
+          win = false
+        }
+      }
+      if (win) {
+        return true
+      }
+    }
+
+    { // 右上角到左下角交叉线3连子
+      let win = true
+      for (let j = 0; j < 3; j++) {
+        if (getCellStatus(chessboard, j, 3 - j - 1) !== status) {
+          win = false
+        }
+      }
+      if (win) {
+        return true
+      }
+    }
+  }
+
+  function willWin(chessboard, status) {
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (getCellStatus(chessboard, i, j, status)) {
+          continue
+        }
+        setCellStatus(chessboard, i, j, status) // 模拟下子
+        pushStep(i, j, status)
+        let result = check(chessboard, status)
+        rollback(1) // 还原
+        if (result) {
+          return [i, j]
+        }
+      }
+    }
+    return null
+  }
+
+  function bestChoice(chessboard, status) {
+    let p
+    if (p = willWin(chessboard, status)) { // 若有获胜一步棋，则返回该步，结束
+      return {
+        point: p,
+        result: 1
+      }
+    }
+
+    let result = -2
+    let point = null
+    outer:
+    for (let i = 0; i < 3; i++) {
+      inner:
+      for (let j = 0; j < 3; j++) {
+        if (getCellStatus(chessboard, i, j, status)) {
+          continue
+        }
+        setCellStatus(chessboard, i, j, status) // 我方模拟下子
+        pushStep(i, j, status)
+        let r = bestChoice(chessboard, 3 - status).result // 找出下一步对方最优下子的胜负结果，1，0，-1之一
+        rollback(1)
+        if (- r > result) { // 当-r结果为正时，说明我方可获胜，替换使用该步下法
+          result = -r
+          point = [i, j]
+        }
+        if (result > 0) { // 胜负剪枝
+          break outer
+        }
+      }
+    }
+
+    return {
+      point: point,
+      result: point ? result : 0 // 如果point为null说明找不到可获胜的下子或者棋已走完
+    }
+  }
+
+  function userMove(i, j) {
+    if (isWin || status === computerStatus) {
+      return
+    }
+    setCellStatus(chessboard, i, j, status)
+    if (check(chessboard, status)) {
+      isWin = true
+      let currentStatus = status
+      setTimeout(() => {
+        alert(currentStatus === 2 ? '× win' : '√ win')
+      }, 500)
+    }
+    status = 3 - status
+    render(chessboard)
+    setTimeout(computerMove, 500)
+  }
+
+  function computerMove() {
+    let choice = bestChoice(chessboard, status)
+    if (choice.point) {
+      setCellStatus(chessboard, choice.point[0], choice.point[1], status)
+    }
+    if (check(chessboard, status)) {
+      isWin = true
+      let currentStatus = status
+      setTimeout(() => {
+        alert(currentStatus === 2 ? '× win' : '√ win')
+      }, 500)
+    }
+    status = 3 - status
+    render(chessboard)
+  }
+
+  function render(chessboard) {
+    let board = document.getElementById('board')
+    board.innerHTML = ''
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        let cell = document.createElement('div')
+        let cellStatus = getCellStatus(chessboard, i, j)
+        cell.classList.add('cell')
+        cell.innerText = cellStatus === 2 ? '×' :
+          cellStatus === 1 ? '√' : ''
+        if (cellStatus === 0) {
+          cell.addEventListener('click', () => userMove(i, j))
+        }
+        board.appendChild(cell)
+      }
+      board.appendChild(document.createElement('br'))
+    }
+  }
+
+  render(chessboard)
+</script>
