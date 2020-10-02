@@ -1,0 +1,86 @@
+<div class='wrapper'>
+  <div class='light green'></div>
+  <div class='light yellow'></div>
+  <div class='light red'></div>
+</div>
+<script>
+  function sleep(duration) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, duration)
+    })
+  }
+  function changeLight(activeClass, diactiveClass) {
+    diactiveClass && document.getElementsByClassName(diactiveClass)[0].classList.remove('active')
+    activeClass && document.getElementsByClassName(activeClass)[0].classList.add('active')
+  }
+  // async function go() {
+  //   changeLight('green')
+  //   await sleep(2000)
+  //   changeLight('yellow', 'green')
+  //   await sleep(2000)
+  //   changeLight('red', 'yellow')
+  //   await sleep(2000)
+  //   changeLight(null, 'red')
+  //   await sleep(500)
+  //   go()
+  // }
+  // go()
+
+
+  function* yieldGo() {
+    while(true) {
+      changeLight('green')
+      yield sleep(2000)
+      changeLight('yellow', 'green')
+      yield sleep(2000)
+      changeLight('red', 'yellow')
+      yield sleep(2000)
+      changeLight(null, 'red')
+      yield sleep(500)
+    }
+  }
+
+  function run(iterator) {
+    let { value, done } = iterator.next()
+    if (done) {
+      return
+    }
+    if (value instanceof Promise) {
+      value.then(() => {
+        run(iterator)
+      })
+    }
+  }
+
+  function co(generator) {
+    return function() {
+      return run(generator())
+    }
+  }
+
+  let go = co(yieldGo)
+  go()
+
+</script>
+<style>
+  .wrapper {
+    display: flex;
+    margin: 30px;
+  }
+  .light {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 10px;
+    border: solid 1px #ddd;
+  }
+  .red.active {
+    background-color: red;
+  }
+  .green.active {
+    background-color: green;
+  }
+  .yellow.active {
+    background-color: yellow;
+  }
+</style>
