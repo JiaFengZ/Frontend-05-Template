@@ -15,4 +15,4 @@
 * callback
 * promise
 * async/await
-* generatore/yield
+* generator/yield
