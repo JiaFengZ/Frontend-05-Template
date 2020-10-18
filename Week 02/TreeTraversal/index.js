@@ -12,7 +12,7 @@ function breathOrder(node) {
   let arr = []
   queue.push(node)
   while (queue.length) {
-    let node = arr.shift()
+    let node = queue.shift()
     arr.push(node)
     queue.push(node.left)
     queue.push(node.right)
