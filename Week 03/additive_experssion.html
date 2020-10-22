@@ -1,0 +1,185 @@
+<script>
+  let regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g
+
+  // 词法分析取出的token类型
+  let dictionary = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-']
+
+  let lastIndex
+
+  function* tokenize(source) {
+    let result = null
+    while (true) {
+      // 在循环中反复地调用 exec() 方法检索token
+      // 找到了匹配的文本，则返回一个结果数组,第0项为匹配的文本，后面n项为对应子表达式匹配的文本，无则undefined
+      // 找到了与表达式相匹配的文本时，会把 RegExpObject 的 lastIndex 设置为匹配文本的最后一个字符的下一个位置
+      lastIndex = regexp.lastIndex
+      result = regexp.exec(source)
+      
+      if (!result) {
+        break
+      }
+
+      // 如果lastindex移动的长度大于匹配文本的长度，说明含有非法字符，终止解析
+      if (regexp.lastIndex - lastIndex > result[0].length) {
+        break
+      }
+
+      let token = {
+        type: null,
+        value: null
+      }
+
+      for (let i = 1; i <= dictionary.length; i++) {
+        if (result[i]) {
+          token.type = dictionary[i - 1]
+        }
+      }
+
+      token.value = result[0]
+      yield token
+    }
+
+    yield {
+      type: 'EOF'
+    }
+  }
+
+  let source = []
+
+  for (let token of tokenize('6 + 10 * 25 / 2')) {
+    if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
+      source.push(token)
+    }
+  }
+
+  /**
+   * Expression = 
+   * AdditiveExpression EOF
+   * 
+   * AdditiveExpression = 
+   * Number
+   * |MultiplicativeExpression * Number
+   * |MultiplicativeExpression / Number
+   * |AdditiveExpression + MultiplicativeExpression
+   * |AdditiveExpression - MultiplicativeExpression
+   * 
+   * 从左到右解析token，加法表达式递归表示为乘法表达式的组合，乘法表达式递归表示为数字
+   * 根据该语法解析规则，乘法表达式处理优先级高于加法，符合四则运算规则
+  */
+
+  // 四则运算表达式
+  function Expression(source) {
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === 'EOF') {
+      let node = {
+        type: 'Expression',
+        children: [source.shift(), source.shift()]
+      }
+      source.unshift(node)
+      return node
+    }
+
+    // 四则表达式降级为加法表达式的组合
+    AdditiveExpression(source)
+    return Expression(source)
+  }
+
+  // 加法表达式解析
+  function AdditiveExpression(source) {
+    if (source[0].type === 'MultiplicativeExpression') { // 乘法表达式视为特殊的加法表达式
+      let node = {
+        type: 'AdditiveExpression',
+        children: [source[0]]
+      }
+      source[0] = node // 转换为语法节点
+      return AdditiveExpression(source)
+    }
+
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '+') {
+      let node = {
+        type: 'AdditiveExpression',
+        operactor: '+',
+        children: []
+      }
+      // 把连续的三项token合并为加法表达式节点
+      node.children.push(source.shift())
+      node.children.push(source.shift())
+      MultiplicativeExpression(source) // 把token抓换为MultiplicativeExpression
+      node.children.push(source.shift())
+      source.unshift(node)
+      return AdditiveExpression(source)
+    }
+
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '-') {
+      let node = {
+        type: 'AdditiveExpression',
+        operactor: '-',
+        children: []
+      }
+      // 把连续的三项token合并为加法表达式节点
+      node.children.push(source.shift())
+      node.children.push(source.shift())
+      MultiplicativeExpression(source) // 把token抓换为MultiplicativeExpression
+      node.children.push(source.shift())
+      source.unshift(node)
+      return AdditiveExpression(source)
+    }
+
+    if (source[0].type === 'AdditiveExpression') {
+      // 递归结束，返回表达式
+      return source[0]
+    }
+
+    // 不是加法表达式，则是乘法表达式
+    // 加法表达式递归降级为乘法表达式的组合
+    MultiplicativeExpression(source)
+    return AdditiveExpression(source)
+  }
+  
+  // 乘法表达式
+  function MultiplicativeExpression(source) {
+    if (source[0].type === 'Number') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        children: [source[0]]
+      }
+      source[0] = node // 转换为语法节点
+      return MultiplicativeExpression(source)
+    }
+
+    if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '*') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        operactor: '*',
+        children: []
+      }
+      // 把连续的三项token合并为乘法表达式节点
+      node.children.push(source.shift())
+      node.children.push(source.shift())
+      node.children.push(source.shift())
+      source.unshift(node)
+      return MultiplicativeExpression(source)
+    }
+
+    if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '/') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        operactor: '/',
+        children: []
+      }
+      // 把连续的三项token合并为乘法表达式节点
+      node.children.push(source.shift())
+      node.children.push(source.shift())
+      node.children.push(source.shift())
+      source.unshift(node)
+      return MultiplicativeExpression(source)
+    }
+
+    if (source[0].type === 'MultiplicativeExpression') {
+      return source[0]
+    }
+
+    return MultiplicativeExpression(source)
+  }
+
+  console.log(Expression(source))
+</script>
