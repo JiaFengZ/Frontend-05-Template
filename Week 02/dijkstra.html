@@ -1,0 +1,177 @@
+
+<script>
+  /*
+  * Dijkstra 寻路算法
+  * 采用二叉堆优化
+  */
+
+  // 加边
+  let pointIndexSet = {}
+  let pointNameSet = {}
+  function addEdge(adj, u_name, v_name, wt) {
+    let u = pointIndexSet[u_name] === undefined ? adj.length : pointIndexSet[u_name]
+    pointIndexSet[u_name] = u
+    pointNameSet[u] = u_name
+    if (!adj[u]) {
+      adj[u] = []
+    }
+    adj[u].push({
+      point: v_name,
+      weight: wt
+    })
+    let v = pointIndexSet[v_name] === undefined ? adj.length : pointIndexSet[v_name]
+    pointIndexSet[v_name] = v
+    pointNameSet[v] = v_name
+    if (!adj[v]) {
+      adj[v] = []
+    }
+    adj[v].push({
+      point: u_name,
+      weight: wt,
+    })
+  }
+
+
+  // 计算最短路径
+  function shortestPath(adj, src_name) {
+    let pq = new BinaryHeap([], function (a, b) {
+      return a.weight - b.weight
+    })
+
+    // 距离置为正无穷大
+    let dist = {}
+    for (let i in adj) {
+      let point = Object.value
+      dist[i] = {
+        value: Infinity,
+        visit: false,
+        path: [],
+        point: pointNameSet[i]
+      }
+    }
+
+    // 插入源点，距离为0
+    let srcPointIndex = pointIndexSet[src_name]
+    pq.give({
+      point: src_name,
+      weight: 0
+    });
+    dist[srcPointIndex] = {
+      value: 0,
+      visit: true,
+      path: [src_name],
+      point: src_name
+    }
+
+    /* 循环直到优先队列为空 */
+    while (pq.length) {
+      // 每次从优先队列中取出顶点事实上是这一轮最短路径权值的点
+      let u = pointIndexSet[pq.take().point]
+      dist[u].visit = true
+
+      // 遍历所有边(相邻节点)
+      for (let x of adj[u]) {
+        // 得到顶点边号以及边权
+        let v = pointIndexSet[x.point]
+        let weight = x.weight
+
+        //可以松弛
+        if (!dist[v].visit && dist[v].value > dist[u].value + weight) {
+          // 松弛 
+          dist[v].value = dist[u].value + weight
+          dist[v].path = [].concat(dist[u].path, [x.point])
+          pq.give({
+            point: x.point,
+            weight: dist[v].value + weight
+          })
+        }
+      }
+    }
+
+    // 打印最短路
+    console.log(dist)
+  }
+
+  function main() {
+    let adj = []
+    addEdge(adj, 0, 1, 4)
+    addEdge(adj, 0, 7, 8)
+    addEdge(adj, 1, 2, 8)
+    addEdge(adj, 1, 7, 11)
+    addEdge(adj, 2, 3, 7)
+    addEdge(adj, 2, 8, 2)
+    addEdge(adj, 2, 5, 4)
+    addEdge(adj, 3, 4, 9)
+    addEdge(adj, 3, 5, 14)
+    addEdge(adj, 4, 5, 10)
+    addEdge(adj, 5, 6, 2)
+    addEdge(adj, 6, 7, 1)
+    addEdge(adj, 6, 8, 6)
+    addEdge(adj, 7, 8, 7)
+
+    console.log(adj)
+
+    shortestPath(adj, 0)
+  }
+
+  class BinaryHeap {
+    constructor(data, compare) {
+      this.compare = compare || ((a, b) => (a - b))
+      this.data = [null]
+      for (let i = 0; i < data.length; i++) {
+        this.give(data[i])
+      }
+    }
+
+    // 删除并返回当前队列中最高优先级的元素
+    take() {
+      // 把最大的和最小的交换位置，取出并删除最小的，然后把交换后的节点下沉到正确位置
+      if (this.data.length <= 1) {
+        return
+      }
+      this.swap(1, this.data.length - 1)
+      const max = this.data.pop()
+      this.down(1)
+      return max
+    }
+
+    // 插入元素
+    give(v) {
+      this.data.push(v)
+      this.up(this.data.length - 1)
+    }
+
+    // 把节点 i 的元素按大小下沉到合适的位置
+    down(i) {
+      while (2 * i <= this.data.length - 1) {
+        let index = 2 * i
+        if (2 * i + 1 <= this.data.length - 1 && this.compare(this.data[2 * i], this.data[2 * i + 1]) > 0) {
+          index = 2 * i + 1
+        }
+        if (this.compare(this.data[index], this.data[i]) < 0) {
+          this.swap(index, i)
+          i = index
+        } else {
+          break
+        }
+      }
+    }
+
+    up(i) {
+      while (i > 1 && this.compare(this.data[i], this.data[Math.floor(i / 2)]) < 0) {
+        this.swap(Math.floor(i / 2), i)
+        i = Math.floor(i / 2)
+      }
+    }
+
+    swap(i, j) {
+      const temp = this.data[i]
+      this.data[i] = this.data[j]
+      this.data[j] = temp
+    }
+
+    get length() {
+      return this.data.length - 1 // 第一个位置不放置元素
+    }
+  }
+</script>
