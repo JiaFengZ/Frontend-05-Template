@@ -1,0 +1,192 @@
+<h1>默认</h1>
+<button onclick="defaultGraph()">执行搜索路径</button>
+
+<h1>自定义</h1>
+边起点：<input id='startPoint' />
+边终点：<input id='endPoint' />
+权重：<input id='weight' type='number'/>
+<button onclick="addEdge()">添加边</button>
+<button onclick="customGraph()">执行搜索路径</button>
+<button onclick="reset()">重置</button>
+<h3>图：</h3>
+<div id='edges'></div>
+<h3>结果：</h3>
+<div id='container'></div>
+<script>
+  
+  var edges = []
+
+  function defaultGraph() {
+    //创建图
+    var ab = new Edge("A", "B", 1)
+    var ac = new Edge("A", "C", 4)
+    var bc = new Edge("B", "C", 3)
+    var be = new Edge("B", "E", 2)
+    var ed = new Edge("E", "D", 3)
+    var dc = new Edge("D", "C", 5)
+    var bd = new Edge("B", "D", 2)
+      
+    // 从起点A出发，步骤少的排前面
+    edges = [ab, ac, bc, be, bd, ed, dc]
+
+    for (var edge of edges) {
+      printEdge(edge)
+    }
+
+    let bellmanFord = new BellmanFord(edges)
+
+    bellmanFord.shortestPath()
+
+    edges = []
+  }
+
+  function customGraph() {
+    let bellmanFord = new BellmanFord(edges)
+    bellmanFord.shortestPath()
+  }
+
+  function addEdge() {
+    if (edges.length === 0) {
+      clear()
+    }
+    var startPoint = document.getElementById('startPoint')
+    var endPoint = document.getElementById('endPoint')
+    var weight = document.getElementById('weight')
+    var edge = new Edge(startPoint.value, endPoint.value, parseInt(weight.value, 10))
+    if (edges.some(function(edge) {
+      return edge.startPoint === startPoint.value && edge.endPoint === endPoint.value
+        || edge.startPoint === endPoint.value && edge.endPoint === startPoint.value
+    })) {
+      alert('边已经存在，请不要重复输入！')
+      return
+    }
+    startPoint.value = endPoint.value = weight.value = null
+    edges.push(edge)
+    printEdge(edge)
+  }
+
+  function print(str) {
+    var container = document.getElementById('container')
+    var span = document.createElement('span')
+    span.innerText = str
+    container.appendChild(span)
+  }
+
+  function printEdge(edge) {
+    var container = document.getElementById('edges')
+    var span = document.createElement('p')
+    span.innerText = edge.startPoint + ' -> ' + edge.endPoint
+    container.appendChild(span)
+  }
+
+  function clear() {
+    var container = document.getElementById('container')
+    container.innerHTML = ''
+    container = document.getElementById('edges')
+    container.innerHTML = ''
+  }
+
+  function reset() {
+    edges = []
+    clear() 
+  }
+
+  class BellmanFord {
+    /*
+    * bellman_ford算法
+    */
+    constructor(edges) {
+      this.costMap = {} // 源点到顶点的距离
+      this.prevMap = {} // 顶点的前驱顶点
+      this.edges = edges
+    }
+
+    shortestPath() {
+      let { edges, costMap, prevMap } = this
+      
+      //初始化各个节点所消费的
+      for (var edge of edges) {
+        costMap[edge.startPoint] = Infinity
+        costMap[edge.endPoint] = Infinity
+      }
+      costMap[edges[0].startPoint] = 0
+      
+      //进行节点数n-1次循环
+      for(var i = 1; i < Object.keys(costMap).length; i++) {
+        var hasChange = false
+        for(var j = 0; j < edges.length; j++) {
+          var edge = edges[j]
+          //该边起点目前总的路径大小
+          var startPointCost = edge.getStartPoint() ? costMap[edge.getStartPoint()] : 0
+          //该边终点目前总的路径大小
+          var endPointCost = edge.getEndPoint() ? costMap[edge.getEndPoint()] : Infinity
+          //如果该边终点目前的路径大小 > 该边起点的路径大小 + 该边权重 ，说明有更短的路径了
+          if(endPointCost > (startPointCost + edge.getWeight())) {
+            costMap[edge.getEndPoint()] = startPointCost + edge.getWeight()
+            prevMap[edge.getEndPoint()] = edge.getStartPoint()
+            hasChange = true
+          }
+        }
+        if (!hasChange) {
+          //经常还没达到最大遍历次数便已经求出解了，此时可以优化为提前退出循环
+          break
+        }
+      }
+      
+      //在进行一次判断是否存在负环路
+      var hasRing = false
+      for(var j =0; j < edges.length; j++) {
+        var edge = edges[j]
+        var startPointCost = edge.getStartPoint() ? costMap[edge.getStartPoint()] : 0
+        var endPointCost = edge.getEndPoint() ? costMap[edge.getEndPoint()] : Infinity
+        if(endPointCost > (startPointCost + edge.getWeight())) {
+          print("\n图中存在负环路，无法求解\n")
+          hasRing = true
+          break
+        }
+      }
+      
+      if(!hasRing) {
+        //打印出到各个节点的最短路径
+        for(var key in costMap) {
+          print("\n到目标节点" + key + "最短路径距离:" + costMap[key] + ' ')
+          if(prevMap[key]) {
+            var pathList = []
+            var parentKey = prevMap[key]
+            while (parentKey !== undefined) {
+              pathList.unshift(parentKey)
+              parentKey = prevMap[parentKey]
+            }
+            pathList.push(key)
+            var path = ''
+            for(var k of pathList) {
+              path = path === "" ? path : path + " --> "
+              path = path +  k 
+            }
+            print("路线为:" + path)
+          } 
+        }
+      }
+    }
+  }
+
+  class Edge {
+    constructor(startPoint, endPoint, weight) {
+      this.startPoint = startPoint
+      this.endPoint = endPoint
+      this.weight = weight
+    }
+    getStartPoint() {
+      return this.startPoint
+    }
+    
+    getEndPoint() {
+      return this.endPoint
+    }
+    
+    getWeight() {
+      return this.weight
+    }
+  }
+  
+</script>
