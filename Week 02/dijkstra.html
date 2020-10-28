@@ -1,119 +1,231 @@
+<h1>默认</h1>
+<button onclick="defaultGraph()">执行搜索路径</button>
 
+<h1>自定义</h1>
+边起点：<input id='startPoint' />
+边终点：<input id='endPoint' />
+权重：<input id='weight' type='number'/>
+<button onclick="addEdge()">添加边</button>
+<button onclick="customGraph()">执行搜索路径</button>
+<button onclick="reset()">重置</button>
+<h3>图：</h3>
+<div id='edges'></div>
+<h3>结果：</h3>
+<div id='container'></div>
 <script>
-  /*
-  * Dijkstra 寻路算法
-  * 采用二叉堆优化
-  */
 
-  // 加边
-  let pointIndexSet = {}
-  let pointNameSet = {}
-  function addEdge(adj, u_name, v_name, wt) {
-    let u = pointIndexSet[u_name] === undefined ? adj.length : pointIndexSet[u_name]
-    pointIndexSet[u_name] = u
-    pointNameSet[u] = u_name
-    if (!adj[u]) {
-      adj[u] = []
+  var edges = []
+
+  function defaultGraph() {
+    //创建图
+    let adj = []
+    var ab = new Edge("A", "B", 1)
+    var ac = new Edge("A", "C", 4)
+    var bc = new Edge("B", "C", 3)
+    var be = new Edge("B", "E", 2)
+    var ed = new Edge("E", "D", 3)
+    var dc = new Edge("D", "C", 5)
+    var bd = new Edge("B", "D", 2)
+      
+    // 从起点A出发，步骤少的排前面
+    edges = [ab, ac, bc, be, bd, ed, dc]
+
+    for (var edge of edges) {
+      printEdge(edge)
     }
-    adj[u].push({
-      point: v_name,
-      weight: wt
-    })
-    let v = pointIndexSet[v_name] === undefined ? adj.length : pointIndexSet[v_name]
-    pointIndexSet[v_name] = v
-    pointNameSet[v] = v_name
-    if (!adj[v]) {
-      adj[v] = []
-    }
-    adj[v].push({
-      point: u_name,
-      weight: wt,
-    })
+
+    let dijkstra = new Dijkstra(edges)
+    dijkstra.shortestPath()
+
+    edges = []
   }
 
+  function customGraph() {
+    let dijkstra = new Dijkstra(edges)
+    dijkstra.shortestPath()
+  }
 
-  // 计算最短路径
-  function shortestPath(adj, src_name) {
-    let pq = new BinaryHeap([], function (a, b) {
-      return a.weight - b.weight
-    })
+  function addEdge() {
+    if (edges.length === 0) {
+      clear()
+    }
+    var startPoint = document.getElementById('startPoint')
+    var endPoint = document.getElementById('endPoint')
+    var weight = document.getElementById('weight')
+    var edge = new Edge(startPoint.value, endPoint.value, parseInt(weight.value, 10))
+    if (edges.some(function(edge) {
+      return edge.startPoint === startPoint.value && edge.endPoint === endPoint.value
+        || edge.startPoint === endPoint.value && edge.endPoint === startPoint.value
+    })) {
+      alert('边已经存在，请不要重复输入！')
+      return
+    }
+    startPoint.value = endPoint.value = weight.value = null
+    edges.push(edge)
+    printEdge(edge)
+  }
 
-    // 距离置为正无穷大
-    let dist = {}
-    for (let i in adj) {
-      let point = Object.value
-      dist[i] = {
-        value: Infinity,
-        visit: false,
-        path: [],
-        point: pointNameSet[i]
+  function print(str) {
+    var container = document.getElementById('container')
+    var span = document.createElement('span')
+    span.innerText = str
+    container.appendChild(span)
+  }
+
+  function printEdge(edge) {
+    var container = document.getElementById('edges')
+    var span = document.createElement('p')
+    span.innerText = edge.startPoint + ' -> ' + edge.endPoint
+    container.appendChild(span)
+  }
+
+  function clear() {
+    var container = document.getElementById('container')
+    container.innerHTML = ''
+    container = document.getElementById('edges')
+    container.innerHTML = ''
+  }
+
+  function reset() {
+    edges = []
+    clear() 
+  }
+
+  class Dijkstra {
+    /*
+    * Dijkstra 寻路算法
+    * 采用二叉堆优化
+    */
+    constructor(edges) {
+      this.pointIndexSet = {}
+      this.pointNameSet = {}
+      this.edges = edges
+    }
+
+    shortestPath() {
+      let { edges, pointIndexSet, pointNameSet } = this
+
+      let adj = []
+      edges.forEach((edge) => {
+        this.addGraphEdge(adj, edge, pointIndexSet, pointNameSet)
+      })
+
+      let src_name = edges[0].startPoint
+
+      let pq = new BinaryHeap([], function (a, b) {
+        return a.weight - b.weight
+      })
+
+      // 距离置为正无穷大
+      let dist = {}
+      for (let i in adj) {
+        let point = Object.value
+        dist[i] = {
+          value: Infinity,
+          visit: false,
+          path: [],
+          point: pointNameSet[i]
+        }
       }
-    }
 
-    // 插入源点，距离为0
-    let srcPointIndex = pointIndexSet[src_name]
-    pq.give({
-      point: src_name,
-      weight: 0
-    });
-    dist[srcPointIndex] = {
-      value: 0,
-      visit: true,
-      path: [src_name],
-      point: src_name
-    }
+      // 插入源点，距离为0
+      let srcPointIndex = pointIndexSet[src_name]
+      pq.give({
+        point: src_name,
+        weight: 0
+      });
+      dist[srcPointIndex] = {
+        value: 0,
+        visit: true,
+        path: [src_name],
+        point: src_name
+      }
 
-    /* 循环直到优先队列为空 */
-    while (pq.length) {
-      // 每次从优先队列中取出顶点事实上是这一轮最短路径权值的点
-      let u = pointIndexSet[pq.take().point]
-      dist[u].visit = true
+      /* 循环直到优先队列为空 */
+      while (pq.length) {
+        // 每次从优先队列中取出顶点事实上是这一轮最短路径权值的点
+        let u = pointIndexSet[pq.take().point]
+        dist[u].visit = true
 
-      // 遍历所有边(相邻节点)
-      for (let x of adj[u]) {
-        // 得到顶点边号以及边权
-        let v = pointIndexSet[x.point]
-        let weight = x.weight
+        // 遍历所有边(相邻节点)
+        for (let x of adj[u]) {
+          // 得到顶点边号以及边权
+          let v = pointIndexSet[x.point]
+          let weight = x.weight
 
-        //可以松弛
-        if (!dist[v].visit && dist[v].value > dist[u].value + weight) {
-          // 松弛 
-          dist[v].value = dist[u].value + weight
-          dist[v].path = [].concat(dist[u].path, [x.point])
-          pq.give({
-            point: x.point,
-            weight: dist[v].value + weight
-          })
+          //可以松弛
+          if (!dist[v].visit && dist[v].value > dist[u].value + weight) {
+            // 松弛 
+            dist[v].value = dist[u].value + weight
+            dist[v].path = [].concat(dist[u].path, [x.point])
+            pq.give({
+              point: x.point,
+              weight: dist[v].value + weight
+            })
+          }
+        }
+      }
+
+      // 打印最短路
+      for(var key in dist) {
+        let distItem = dist[key]
+        print("\n到目标节点" + distItem.point + "最短路径距离:" + distItem.value + ' ')
+        if (distItem.path) {
+          var path = ''
+          for(var k of distItem.path) {
+            path = path === "" ? path : path + " --> "
+            path = path +  k 
+          }
+          print("路线为:" + path)
         }
       }
     }
+  
+    addGraphEdge(adj, {startPoint: u_name, endPoint: v_name, weight: wt}) {
+      let { pointIndexSet, pointNameSet } = this
+      let u = pointIndexSet[u_name] === undefined ? adj.length : pointIndexSet[u_name]
+      pointIndexSet[u_name] = u
+      pointNameSet[u] = u_name
+      if (!adj[u]) {
+        adj[u] = []
+      }
+      adj[u].push({
+        point: v_name,
+        weight: wt
+      })
+      let v = pointIndexSet[v_name] === undefined ? adj.length : pointIndexSet[v_name]
+      pointIndexSet[v_name] = v
+      pointNameSet[v] = v_name
+      if (!adj[v]) {
+        adj[v] = []
+      }
+      adj[v].push({
+        point: u_name,
+        weight: wt,
+      })
+    }
 
-    // 打印最短路
-    console.log(dist)
   }
 
-  function main() {
-    let adj = []
-    addEdge(adj, 0, 1, 4)
-    addEdge(adj, 0, 7, 8)
-    addEdge(adj, 1, 2, 8)
-    addEdge(adj, 1, 7, 11)
-    addEdge(adj, 2, 3, 7)
-    addEdge(adj, 2, 8, 2)
-    addEdge(adj, 2, 5, 4)
-    addEdge(adj, 3, 4, 9)
-    addEdge(adj, 3, 5, 14)
-    addEdge(adj, 4, 5, 10)
-    addEdge(adj, 5, 6, 2)
-    addEdge(adj, 6, 7, 1)
-    addEdge(adj, 6, 8, 6)
-    addEdge(adj, 7, 8, 7)
-
-    console.log(adj)
-
-    shortestPath(adj, 0)
+  class Edge {
+    constructor(startPoint, endPoint, weight) {
+      this.startPoint = startPoint
+      this.endPoint = endPoint
+      this.weight = weight
+    }
+    getStartPoint() {
+      return this.startPoint
+    }
+    
+    getEndPoint() {
+      return this.endPoint
+    }
+    
+    getWeight() {
+      return this.weight
+    }
   }
-
+  
   class BinaryHeap {
     constructor(data, compare) {
       this.compare = compare || ((a, b) => (a - b))
