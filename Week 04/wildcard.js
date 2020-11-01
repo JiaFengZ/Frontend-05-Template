@@ -38,24 +38,16 @@ function find(source, pattern) {
       i++
     }
 
-    // let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
-    // reg.lastIndex = lastIndex
-    // console.log(reg.exec(source))
+    let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
+    reg.lastIndex = lastIndex
+    console.log(reg.exec(source))
 
-    // if (!reg.exec(source)) {
-    //   return false
-    // }
-
-    // lastIndex = reg.lastIndex
-
-    let matchIndex = kmp(source.slice(lastIndex, source.length), subPattern, (a, b) => {
-      return a === b || a === '?' || b === '?'
-    })
-    if (matchIndex !== -1) {
-      lastIndex += (matchIndex + 1)
-    } else {
+    if (!reg.exec(source)) {
       return false
     }
+
+    lastIndex = reg.lastIndex
+
   }
 
   // 比对最后一个星号的后段
