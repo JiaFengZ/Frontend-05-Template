@@ -38,15 +38,24 @@ function find(source, pattern) {
       i++
     }
 
-    let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
-    reg.lastIndex = lastIndex
-    console.log(reg.exec(source))
+    // let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
+    // reg.lastIndex = lastIndex
+    // console.log(reg.exec(source))
 
-    if (!reg.exec(source)) {
+    // if (!reg.exec(source)) {
+    //   return false
+    // }
+
+    // lastIndex = reg.lastIndex
+
+    let matchIndex = kmp(source.slice(lastIndex, source.length), subPattern, (a, b) => {
+      return a === b || a === '?' || b === '?'
+    })
+    if (matchIndex !== -1) {
+      lastIndex += (matchIndex + 1)
+    } else {
       return false
     }
-
-    lastIndex = reg.lastIndex
   }
 
   // 比对最后一个星号的后段
@@ -57,6 +66,49 @@ function find(source, pattern) {
     }
   }
   return true
+}
+
+function kmp(source, pattern, isEqual) {
+  let table = new Array(pattern.length).fill(0)
+
+  {
+    let i = 1
+    let j = 0
+    while(i < pattern.length) {
+      if (isEqual(pattern[i], pattern[j])) {
+        i++
+        j++
+        table[i] = j
+      } else {
+        if (j > 0) {
+          j = table[j]
+        } else {
+          i++
+        }
+      }
+    }
+  }
+
+  {
+    let i = 0
+    let j = 0
+    while(i < source.length) {
+      if (j === pattern.length - 1) {
+        return i
+      }
+      if (isEqual(pattern[j], source[i])) {
+        i++
+        j++
+      } else {
+        if (j > 0) {
+          j = table[j]
+        } else {
+          i++
+        }
+      }
+    }
+    return -1
+  }
 }
 
 console.log(find('abcabcaxaac', 'a*b?*b*c'))
