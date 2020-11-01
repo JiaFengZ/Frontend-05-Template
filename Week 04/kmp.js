@@ -1,3 +1,11 @@
+/**
+ * kmp
+ * 字符串模式匹配
+ * 1、根据pattern建立重复跳转表
+ * 2、比对源串和模式串
+ * @param {string} source 
+ * @param {string} pattern 
+ */
 
 function kmp(source, pattern) {
   let table = new Array(pattern.length).fill(0)

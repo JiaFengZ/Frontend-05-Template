@@ -1,10 +1,14 @@
 <script>
+  /*
+  * 字典树
+  */
   class Trie {
     constructor() {
       this.root = Object.create(null)
       this.$ = Symbol('$')
     }
 
+    // 插入
     insert(word) {
       let node = this.root
       for (let c of word) {
@@ -19,6 +23,23 @@
       node[this.$]++
     }
 
+    // 查询
+    search(word) {
+      let length = word.length
+      let i = 0
+      let node = this.root
+      while(i < length) {
+        let c = node[word[i]]
+        if (!c) {
+          return false
+        }
+        node = c
+        i++
+      }
+      return i === length
+    }
+
+    // 查询频率最高的单词
     most() {
       let max = 0
       let maxWord = null
