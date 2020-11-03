@@ -13,6 +13,8 @@
 <h3>结果：</h3>
 <div id='container'></div>
 <script>
+
+  // 核心算法逻辑查看class BellmanFord
   
   var edges = []
 
@@ -104,7 +106,7 @@
     shortestPath() {
       let { edges, costMap, prevMap } = this
       
-      //初始化各个节点所消费的
+      //初始化各个节点的距离
       for (var edge of edges) {
         costMap[edge.startPoint] = Infinity
         costMap[edge.endPoint] = Infinity
