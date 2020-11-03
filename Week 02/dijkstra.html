@@ -126,42 +126,42 @@
           value: Infinity,
           visit: false,
           path: [],
-          point: pointNameSet[i]
+          name: pointNameSet[i]
         }
       }
 
       // 插入源点，距离为0
       let srcPointIndex = pointIndexSet[src_name]
       pq.give({
-        point: src_name,
+        name: src_name,
         weight: 0
       });
       dist[srcPointIndex] = {
         value: 0,
         visit: true,
         path: [src_name],
-        point: src_name
+        name: src_name
       }
 
       /* 循环直到优先队列为空 */
       while (pq.length) {
         // 每次从优先队列中取出顶点事实上是这一轮最短路径权值的点
-        let u = pointIndexSet[pq.take().point]
+        let u = pointIndexSet[pq.take().name]
         dist[u].visit = true
 
         // 遍历所有边(相邻节点)
         for (let x of adj[u]) {
           // 得到顶点边号以及边权
-          let v = pointIndexSet[x.point]
+          let v = pointIndexSet[x.name]
           let weight = x.weight
 
           //可以松弛
           if (!dist[v].visit && dist[v].value > dist[u].value + weight) {
             // 松弛 
             dist[v].value = dist[u].value + weight
-            dist[v].path = [].concat(dist[u].path, [x.point])
+            dist[v].path = [].concat(dist[u].path, [x.name])
             pq.give({
-              point: x.point,
+              name: x.name,
               weight: dist[v].value + weight
             })
           }
@@ -171,7 +171,7 @@
       // 打印最短路
       for(var key in dist) {
         let distItem = dist[key]
-        print("\n到目标节点" + distItem.point + "最短路径距离:" + distItem.value + ' ')
+        print("\n到目标节点" + distItem.name + "最短路径距离:" + distItem.value + ' ')
         if (distItem.path) {
           var path = ''
           for(var k of distItem.path) {
@@ -192,7 +192,7 @@
         adj[u] = []
       }
       adj[u].push({
-        point: v_name,
+        name: v_name,
         weight: wt
       })
       let v = pointIndexSet[v_name] === undefined ? adj.length : pointIndexSet[v_name]
@@ -202,7 +202,7 @@
         adj[v] = []
       }
       adj[v].push({
-        point: u_name,
+        name: u_name,
         weight: wt,
       })
     }
