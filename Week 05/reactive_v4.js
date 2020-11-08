@@ -45,7 +45,7 @@ function reactive(object) {
         }
       }
       obj[prop] = val
-      return obj[prop] = val
+      return obj[prop]
     },
 
     get(obj, prop) {

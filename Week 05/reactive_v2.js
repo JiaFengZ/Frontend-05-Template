@@ -21,7 +21,7 @@ function reactive(object) {
         callback()
       }
       obj[prop] = val
-      return obj[prop] = val
+      return obj[prop]
     },
 
     get(obj, prop) {
@@ -30,3 +30,5 @@ function reactive(object) {
     }
   }) 
 }
+
+po.a = 1
