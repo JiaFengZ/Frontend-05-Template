@@ -1,20 +1,24 @@
 /**
- * 2进制
- * 11110111010
- * 10进制
- * 12345678
- * 8进制
- * 012367
- * 16进制
- * 0x123cccf
- */
-
-/**
  * 
  * @param {string} str 要转换的字符串
  * @param {number} r 进制
  */
 function StringToNumber(str, r) {
+  switch (r) {
+    case 10:
+      break
+    case 2:
+      break
+    case 8:
+      str = str.replace(/^0(O|o)(?=[0-7]+$)/, '')
+      break
+    case 16:
+      str = str.replace(/^0(x|X)(?=[0-9a-fA-F])+$/, '')
+      break
+    default:
+      return
+  }
+
   let arr = str.split('')
   let i = arr.length - 1
   let num = 0
@@ -38,4 +42,4 @@ function StringToNumber(str, r) {
 console.log(StringToNumber('0011111', 2))
 console.log(StringToNumber('0x100fff', 16))
 console.log(StringToNumber('110', 10))
-console.log(StringToNumber('010', 8))
+console.log(StringToNumber('0o10', 8))
