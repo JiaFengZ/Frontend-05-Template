@@ -58,8 +58,8 @@
   * Proxy
   * Module Namespace
 
-### 1.3、使用G6可视化绘制原型对象图
-![](./realm_objects.jpg)
+### 1.3、使用G6可视化绘制原型对象图 [源码](./realm_chart.html)
+![对象关系图](./realm_objects.jpg)
 
 ## 2、表达式、语句
 ### 2.1 [运算符优先级](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)
