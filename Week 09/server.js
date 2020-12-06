@@ -25,9 +25,10 @@ http.createServer((request, response) => {
             background-color: #ff1111;
           }
         </style>
+        </head>
         <body>
           <div>
-            <img id='myid' />
+            <img id='myid' src="cc"/>
             <img />
           </div>
         </body>

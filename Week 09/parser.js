@@ -1,9 +1,57 @@
 const EOF = Symbol('EOF')
 let currentToken = null
 let currentAttribute = null
+let currentTextNode = null
+let stack = [{type: 'document', children: []}]
 
 function emit(token) {
   console.log(token)
+  let top = stack[stack.length - 1]
+
+  if (token.type === 'startTag') {
+    let element = {
+      type: 'element',
+      children: [],
+      arrtibutes: []
+    }
+    
+    element.tagName = token.tagName
+
+    for (let p in token) {
+      if (p !== 'type' && p !== 'tagName') {
+        // 收集属性
+        element.arrtibutes.push({
+          name: p,
+          value: token[p]
+        })
+      }
+    }
+
+    // 构建子节点和父节点关系
+    top.children.push(element)
+    element.parent = top
+
+    if (!token.isSelfClosing) {
+      stack.push(element)
+    }
+    currentTextNode = null
+  } else if (token.type === 'endTag') {
+    if (top.tagName !== token.tagName) { // 闭合标签，从堆栈中出栈
+      throw new Error('Tag start end doesn\'t match !')
+    } else {
+      stack.pop()
+    }
+    currentTextNode = null
+  } else if (token.type === 'text') {
+    if (currentTextNode === null)  {
+      currentTextNode = {
+        type: 'text',
+        content: ''
+      }
+      top.children.push(currentTextNode)
+    }
+    currentTextNode.content += token.content
+  }
 }
 
 // 初始状态
@@ -225,4 +273,5 @@ module.exports.parseHtml = function parseHtml(html) {
     state = state(c)
   }
   state = state(EOF)
+  console.log(stack[0])
 }
