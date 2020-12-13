@@ -319,9 +319,10 @@ function layout(element) {
           itemStyle[crossStart] = crossBase + crossSign * (lineCrossSize - itemStyle[crossSize]) / 2
           itemStyle[crossEnd] = itemStyle[crossStart] + crossSign * itemStyle[crossSize]
         }
-        if (align == 'stretch') {
+        if (align === 'stretch') {
           itemStyle[crossStart] = crossBase
-          //itemStyle[crossEnd] = crossBase + crossSign * ((itemStyle[crossSize] !== null && itemStyle[crossSize] !== undefined) ? '')
+          itemStyle[crossEnd] = crossBase + crossSign * ((itemStyle[crossSize] !== null && itemStyle[crossSize] !== (void 0)) ? itemStyle[crossSize] : lineCrossSize)
+          itemStyle[crossSize] = crossSign * (itemStyle[crossEnd] - itemStyle[crossStart])
         }
       }
       crossBase += crossSign * (lineCrossSize + step)
