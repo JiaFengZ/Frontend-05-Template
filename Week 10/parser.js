@@ -15,8 +15,8 @@ function addCssRules(text) {
 
 function computeCSS(element) {
   let elements = stack.slice().reverse()
-  if (!element.computeStyle) {
-    element.computeStyle = {}
+  if (!element.computedStyle) {
+    element.computedStyle = {}
   }
 
   for (let rule of rules) {
@@ -37,7 +37,7 @@ function computeCSS(element) {
     }
     if (matched) {
       // 匹配到元素
-      let computedStyle = element.computeStyle
+      let computedStyle = element.computedStyle
       let sp = specificity(rule.selectors[0])
       for (let declaration of rule.declarations) {
         if (!computedStyle[declaration.property]) {
@@ -51,7 +51,7 @@ function computeCSS(element) {
           computedStyle[declaration.property].specificity = sp
         }
       }
-      //console.log(element.computeStyle)
+      //console.log(element.computedStyle)
     }
   }
 }
@@ -383,4 +383,5 @@ module.exports.parseHtml = function parseHtml(html) {
   }
   state = state(EOF)
   console.log(stack[0])
+  return stack[0]
 }

@@ -12,7 +12,7 @@ function layout(element) {
     return (a.order || 0) - (b.order || 0)
   })
 
-  let style = elementStyle
+  let style = elementStyle;
 
   ['width', 'height'].forEach(size => {
     if (style[size] === 'auto' || style[size] === '') {
@@ -43,7 +43,7 @@ function layout(element) {
   let mainBase // 属性初始值
   let crossSize // 交叉轴，同上
   let crossStart
-  let corssEnd
+  let crossEnd
   let crossSign
   let crossBase
 
@@ -56,7 +56,7 @@ function layout(element) {
 
     crossSize = 'height'
     crossStart = 'top'
-    corssEnd = 'bottom'
+    crossEnd = 'bottom'
   }
   if (style.flexDirection === 'row-reverse') {
     mainSign = 'width'
@@ -67,7 +67,7 @@ function layout(element) {
 
     crossSize = 'height'
     crossStart = 'top'
-    corssEnd = 'bottom'
+    crossEnd = 'bottom'
   }
   if (style.flexDirection === 'column') {
     mainSign = 'height'
@@ -78,7 +78,7 @@ function layout(element) {
 
     crossSize = 'width'
     crossStart = 'left'
-    corssEnd = 'right'
+    crossEnd = 'right'
   }
   if (style.flexDirection === 'column-reverse') {
     mainSign = 'height'
@@ -89,12 +89,12 @@ function layout(element) {
 
     crossSize = 'width'
     crossStart = 'left'
-    corssEnd = 'right'
+    crossEnd = 'right'
   }
   if (style.flexWrap === 'wrap-reverse') {
     let tmp = crossStart
-    crossStart = corssEnd
-    corssEnd = tmp
+    crossStart = crossEnd
+    crossEnd = tmp
     crossSign = -1
   } else {
     crossBase = 0
@@ -107,7 +107,7 @@ function layout(element) {
     for (let i = 0; i < items.length; i++) {
       let item = items[i]
       let itemStyle = getStyle(item)
-      if (itemStyle[mainSize] !== null || itemStyle[mainSize] !== undefined) {
+      if (itemStyle[mainSize] !== null || itemStyle[mainSize] !== (void 0)) {
         elementStyle[mainSize] += itemStyle[mainSize]
       }
     }
@@ -131,7 +131,7 @@ function layout(element) {
       flexLine.push(item)
     } else if (style.flexWrap === 'nowrap' && isAutoMainSize) {
       mainSpace -= itemStyle[mainSize]
-      if (itemStyle[crossSize] !== null && itemStyle[crossSize] !== undefined) {
+      if (itemStyle[crossSize] !== null && itemStyle[crossSize] !== (void 0)) {
         crossSpace = Math.max(crossSpace, itemStyle[crossSize]) // 交叉轴尺寸由最大尺寸的元素决定
       }
       flexLine.push(item)
@@ -149,7 +149,7 @@ function layout(element) {
       } else {
         flexLine.push(item)
       }
-      if (itemStyle[crossSize] !== nul && itemStyle[crossSize] !== undefined) {
+      if (itemStyle[crossSize] !== nul && itemStyle[crossSize] !== (void 0)) {
         crossSpace = Math.max(crossSpace, itemStyle[crossSize])
       }
       mainSpace -= itemStyle[mainSize]
@@ -194,7 +194,7 @@ function layout(element) {
         let item = items[i]
         let itemStyle = getStyle(item)
 
-        if ((itemStyle.flex !== null) && itemStyle.flex !== undefined) {
+        if ((itemStyle.flex !== null) && itemStyle.flex !== (void 0)) {
           flexTotal += itemStyle.flex
           continue
         }
@@ -249,7 +249,7 @@ function layout(element) {
   // 计算主轴--------------------
 
   // 计算交叉轴--------------------
-  let crossSpace
+  
   if (!style[crossSize]) {
     crossSpace = 0
     elementStyle[crossSize] = 0
@@ -269,7 +269,6 @@ function layout(element) {
     crossBase = 0
   }
   let lineSize = style[crossSize] / flexLines.length
-  let type
   let step
   if (style.alignContent === 'fex-start') {
     crossBase += 0
@@ -335,7 +334,7 @@ function getStyle(element) {
     element.style = {}
   }
   for (let prop in element.computedStyle) {
-    let p = element.computedStylep[prop].value
+    let p = element.computedStyle[prop].value
     element.style[prop] = p
     if (element.style[prop].toString().match(/px$/)) {
       element.style[prop] = parseInt(element.style[prop], 10)
