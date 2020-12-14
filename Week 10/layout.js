@@ -232,8 +232,8 @@ function layout(element) {
           step = mainBase
         }
         if (style.justifyContent === 'space-around') {
-          currentMain = mainSpace / items.length * mainSign
-          step = step / 2 + mainBase
+          step = mainSpace / items.length * mainSign
+          currentMain = step / 2 + mainBase
         }
 
         for (let i = 0; i < items.length; i++) {
@@ -303,7 +303,7 @@ function layout(element) {
         let itemStyle = getStyle(item)
         
         let align = itemStyle.alignSelf || style.alignItems
-        if (item === null) {
+        if (itemStyle[crossSize] === null) {
           itemStyle[crossSize] = align === 'stretch' ? lineCrossSize : 0
         }
         if (align === 'flex-start') {
