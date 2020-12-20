@@ -28,9 +28,9 @@ first-line需要根据布局结果计算得得出选择结果，如果设置floa
   * rule
 ## css选择器
 ### 简单选择器
-* 星号
+* `*`
 * div
-* .cls
+* .class
 * #id
 * [attr=value]
 * :hover
