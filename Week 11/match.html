@@ -1,4 +1,11 @@
-function match(selector, element) {
+<body>
+  <div>
+    <div id="id" class="class">
+    </div>
+  </div>
+</body>
+<script>
+  function match(selector, element) {
   if (!selector || !element) {
     return false
   }
@@ -32,17 +39,5 @@ function match(selector, element) {
     return true
   })
 }
-
-// match("div #id.class", document.getElementById("id"))
-
-// tagName#id.class
-// #id[attr=val]
-// .class[attr=val]
-// .class.class
-// #id.class:not()
-
-// div 
-// id
-// tag
-// [attr=val]
-// :not()
+console.log(match("div #id.class", document.getElementById("id")))
+</script>
