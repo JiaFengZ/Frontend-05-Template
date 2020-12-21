@@ -4,32 +4,41 @@ function match(selector, element) {
   }
   let parts = selector.split(' ').reverse()
   return parts.every(part => {
-    if (!element) {
-      return false
-    }
-    let tagName = part.match(/^[^#\.\[\:]+/)
-    let classList = part.match(/\.[^#\.\[\:]+/g)
-    let id = part.match(/^#[^#\.\[\:]+/)
-    
-    if (id) {
-      if (!element.id || element.id !== id[0].replace('#', '')) {
+    let matchTest = (element) => {
+      if (!element) {
         return false
       }
-    }
-    if (tagName) {
-      if (element.tagName.toLowerCase() !== tagName[0]) {
-        return false
+      let tagName = part.match(/^[^#\.\[\:]+/)
+      let classList = part.match(/\.[^#\.\[\:]+/g)
+      let id = part.match(/^#[^#\.\[\:]+/)
+      
+      if (id) {
+        if (!element.id || element.id !== id[0].replace('#', '')) {
+          return false
+        }
       }
-    }
-    if (classList) {
-      if (classList.some(className => {
-        return !element.classList.contains(className.replace('.', ''))
-      })) {
-        return false
+      if (tagName) {
+        if (element.tagName.toLowerCase() !== tagName[0]) {
+          return false
+        }
       }
+      if (classList) {
+        if (classList.some(className => {
+          return !element.classList.contains(className.replace('.', ''))
+        })) {
+          return false
+        }
+      }
+      return true
     }
-    element = element.parentNode
-    return true
+
+    if (matchTest(element)) {
+      element = element.parentNode
+      return true
+    } else {
+      element = element.parentNode
+      return matchTest(element)
+    }
   })
 }
 
