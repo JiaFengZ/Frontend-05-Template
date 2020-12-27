@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>css property</title>
+    <style>::-webkit-scrollbar{display:none;}html,body{overflow:hidden;margin:0;}</style>
+</head>
+<body>
+<div id="mountNode"></div>
+<script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-3.1.1/build/g6.js"></script>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.hierarchy-0.5.0/build/hierarchy.js"></script>
+<script>
+  // 参考来源https://www.cnblogs.com/xuanku/p/css_attr.html
+  let propertys = [{
+    id: '字体',
+    children: [{
+      id: 'font-family'
+    }, {
+      id: 'font-size'
+    }, {
+      id: 'font-style'
+    }, {
+      id: 'font-weight'
+    }, {
+      id: 'line-height'
+    }]
+  }, {
+    id: '文本',
+    children: [{
+      id: 'word-spacing'
+    }, {
+      id: 'letter-spacing'
+    }, {
+      id: 'word-break'
+    }, {
+      id: 'word-wrap/overflow-wrap'
+    }, {
+      id: 'vertical-align'
+    }, {
+      id: 'text-align'
+    }, {
+      id: 'text-transform'
+    }, {
+      id: 'text-shadow'
+    }, {
+      id: 'text-decoration'
+    }, {
+      id: 'text-indent'
+    }, {
+      id: 'text-justiy'
+    }, {
+      id: 'text-overflow'
+    }, {
+      id: 'white-space'
+    }]
+  }, {
+    id: '颜色/背景',
+    children: [{
+      id: 'color'
+    }, {
+      id: 'opacity'
+    }, {
+      id: 'backgroud-color'
+    }, {
+      id: 'backgroud-image'
+    }, {
+      id: 'backgroud-clip'
+    }, {
+      id: 'backgroud-origin'
+    }]
+  }, {
+    id: '布局',
+    children: [{
+      id: '基础',
+      children: [{
+        id: 'float'
+      }, {
+        id: 'clear'
+      }, {
+        id: 'position'
+      }, {
+        id: 'top/left/bottom/right'
+      }, {
+        id: 'display'
+      }, {
+        id: 'visibility'
+      }, {
+        id: 'overflow'
+      }, {
+        id: 'z-index'
+      }]
+    }, {
+      id: 'flex布局',
+      children: [{
+        id: 'flex-direction'
+      }, {
+        id: 'flex-wrap'
+      }, {
+        id: 'flex-flow'
+      }, {
+        id: 'align-items'
+      }, {
+        id: 'justify-content'
+      }, {
+        id: 'align-content'
+      }, {
+        id: 'self-align'
+      }, {
+        id: 'flex-bias'
+      }, {
+        id: 'flex-grow'
+      }, {
+        id: 'flex-shrink'
+      }, {
+        id: 'flex'
+      }, {
+        id: 'order'
+      }]
+    }, {
+      id: 'grid布局',
+      children: [{
+        id: 'grid-template-columns(网格分为多少列)'
+      }, {
+        id: 'grid-template-rows(网格分为多少行)'
+      }, {
+        id: 'grid-auto-rows(每一行的高度)'
+      }, {
+        id: 'grid-auto-columns'
+      }, {
+        id: 'grid-column-gap'
+      }, {
+        id: 'grid-row-gap'
+      }]
+    }]
+  }, {
+    id: '动画',
+    children: [{
+      id: 'animation-name'
+    }, {
+      id: 'animation-duration'
+    }, {
+      id: 'animation-timing-function'
+    }, {
+      id: 'animation-delay'
+    }, {
+      id: 'animation-iteration-count'
+    }, {
+      id: 'animation-direction'
+    }, {
+      id: 'animation-play-state'
+    }, {
+      id: 'animation-fill-mode'
+    }]
+  }]
+  let graph = new G6.TreeGraph({
+    container: 'mountNode',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    pixelRatio: 2,
+    modes: {
+      default: [{
+        type: 'collapse-expand',
+        onChange: function onChange(item, collapsed) {
+          var data = item.get('model').data;
+          data.collapsed = collapsed;
+          return true;
+        }
+    }, 'drag-canvas', 'zoom-canvas']
+    },
+    defaultNode: {
+      size: 16,
+      anchorPoints: [[0, 0.5], [1, 0.5]],
+      style: {
+        fill: '#40a9ff',
+        stroke: '#096dd9'
+      }
+    },
+    defaultEdge: {
+      shape: 'cubic-horizontal',
+      style: {
+        stroke: '#A3B1BF'
+      }
+    },
+    layout: {
+      type: 'compactBox',
+      direction: 'LR',
+      getId: function getId(d) {
+        return d.id;
+      },
+      getHeight: function getHeight() {
+        return 16;
+      },
+      getWidth: function getWidth() {
+        return 16;
+      },
+      getVGap: function getVGap() {
+        return 10;
+      },
+      getHGap: function getHGap() {
+        return 100;
+      }
+    }
+  });
+
+  graph.node(function(node) {
+    return {
+      size: 26,
+      style: {
+        fill: '#40a9ff',
+        stroke: '#096dd9'
+      },
+      label: node.id,
+      labelCfg: {
+        position: node.children && node.children.length > 0 ? 'left' : 'right'
+      }
+    };
+  });
+
+  graph.data({
+    id: 'css 属性',
+    children: propertys
+  });
+  graph.render();
+  graph.fitView();
+</script>
+</body>
+</html>
