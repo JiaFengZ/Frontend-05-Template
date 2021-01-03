@@ -40,6 +40,42 @@ names = names.filter(e => !e.match(/^on/))
 // webkti private
 names = names.filter(e => !e.match(/^webkti/))
 
-// https://html.spec.whatwg.org/#window
+// webgl
+let webglObjects = [
+  'WebGLRenderingContext',
+  'WebGL2RenderingContext',
+  'WebGLActiveInfo',
+  'WebGLBuffer',
+  'WebGLContextEvent',
+  'WebGLFramebuffer',
+  'WebGLProgram',
+  'WebGLQuery',
+  'WebGLRenderbuffer',
+  'WebGLSampler',
+  'WebGLShader',
+  'WebGLShaderPrecisionFormat', 
+  'WebGLSync',
+  'WebGLTexture',
+  'WebGLTransformFeedback',
+  'WebGLUniformLocation',
+  'WebGLVertexArrayObject'
+]
+
+// Web Audio
+// https://webaudio.github.io/web-audio-api/#audioapi
+let audioObjects = [
+  'AudioContext',
+  'AudioNode',
+  'AnalyserNode',
+  'AudioBuffer',
+  'AudioBufferSourceNode',
+  'AudioDestinationNode',
+  'AudioParam',
+  'AudioListener',
+  'AudioWorklet',
+  'AudioWorkletGlobalScope',
+  'AudioWorkletNode',
+  'AudioWorkletProcessor'
+]
 
 console.log(names)
