@@ -21,14 +21,12 @@ class Carousel extends Component {
   }
 }
 
-// let a = <div id='a'>
-//   <span>a</span>
-//   <span>b</span>
-//   <span>c</span>
-// </div>
-
 let d = [
-
+  '/static/1.jpeg',
+  '/static/2.jpeg',
+  '/static/3.jpeg',
+  '/static/4.jpeg',
+  '/static/5.jpeg'
 ]
 
 let a = <Carousel src={d}/>
